@@ -78,8 +78,18 @@ define U-Boot/easepi-rk3588
   SOC:=rk3588
 endef
 
+define U-Boot/rock5c-rk3588s
+  NAME:=ROCK 5C
+  DEPENDS:=+PACKAGE_u-boot-$(1):trusted-firmware-a-rk3588
+  ATF:=$(RK3588_ATF)
+  DDR:=$(RK3588_DDR)
+  SOC:=rk3588
+  BUILD_DEVICES:= \
+    radxa_rock-5c
+endef
+
 UBOOT_TARGETS := easepi-rk3568 easepi-rk3588 easepi-rk3528 xgp-rk3568 \
-	easepi-rk3308
+	easepi-rk3308 rock5c-rk3588s
 
 UBOOT_CONFIGURE_VARS += USE_PRIVATE_LIBGCC=yes
 
