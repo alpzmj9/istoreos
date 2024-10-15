@@ -347,6 +347,16 @@ $(call Device/rk3582)
 endef
 TARGET_DEVICES += radxa_e54c
 
+define Device/radxa_rock-5c
+$(call Device/rk3582)
+  DEVICE_VENDOR := Radxa
+  DEVICE_MODEL := Rock 5C
+  SUPPORTED_DEVICES += rock-5c
+  DEVICE_DTS := rk3588s-rock-5c
+  DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-thermal kmod-hwmon-pwmfan
+endef
+TARGET_DEVICES += radxa_rock-5c
+
 define Device/roc_k40pro
 $(call Device/rk3568)
   DEVICE_VENDOR := ROCEOS
