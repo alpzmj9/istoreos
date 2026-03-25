@@ -25,6 +25,7 @@ rockchip_setup_interfaces()
 	jsy,h1|\
 	nlnet,xgp|\
 	radxa,e52c|\
+	xunlong,orangepi-5-plus|\
 	firefly,rk3568-roc-pc)
 		ucidef_set_interfaces_lan_wan 'eth1' 'eth0'
 		;;
@@ -33,7 +34,8 @@ rockchip_setup_interfaces()
 	friendlyelec,nanopi-r5s|friendlyelec,nanopi-r5s-c1)
 		ucidef_set_interfaces_lan_wan "eth1 eth2" "eth0"
 		;;
-	easepi,r1|\
+	easepi,r1|easepi,r1-lite|\
+	linkease,easepi-r2|\
 	roceos,k40pro|\
 	lyt,t68m|\
 	lyt,t88m|\
@@ -44,12 +46,16 @@ rockchip_setup_interfaces()
 	roceos,k50s)
 		ucidef_set_interfaces_lan_wan 'eth1 eth2 eth3 eth4' 'eth0'
 		;;
+	roceos,k60pro)
+		ucidef_set_interfaces_lan_wan 'eth1 eth2 eth3 eth4 eth5' 'eth0'
+		;;
 	friendlyelec,nanopi-r6s)
 		ucidef_set_interfaces_lan_wan 'eth2 eth0' 'eth1'
 		;;
 	yijiahe,jm10)
 		ucidef_set_interfaces_lan_wan 'eth0 eth2 eth3 eth4 eth5 eth6 eth7 eth8' 'eth1'
 		;;
+	easepi,a2-qc|\
 	ezpro,mrkaio-m68s|\
 	ezpro,mrkaio-m68s-plus|\
 	radxa,e20c|\
@@ -95,6 +101,15 @@ generate_mac_from_mmc()
 	echo "$(macaddr_unsetbit_mc "$(macaddr_setbit_la "${mac_base}")")"
 }
 
+read_vendor_mac()
+{
+	if [ -f /proc/device-tree/chosen/has-vendor-mac -a -x /usr/sbin/vendorStorage ]; then
+		/usr/sbin/vendorStorage readMac
+		return 0
+	fi
+	return 1
+}
+
 rockchip_setup_macs()
 {
 	local board="$1"
@@ -104,7 +119,8 @@ rockchip_setup_macs()
 	case "$board" in
 	armsom,sige7-v1|\
 	easepi,ars4|\
-	easepi,r1|\
+	easepi,r1|easepi,r1-lite|\
+	linkease,easepi-r2|\
 	ezpro,mrkaio-m68s|\
 	ezpro,mrkaio-m68s-plus|\
 	firefly,rk3568-roc-pc|\
@@ -133,6 +149,7 @@ rockchip_setup_macs()
 	lyt,t68m|\
 	lyt,t88m|\
 	yijiahe,jm10|\
+	xunlong,orangepi-5-plus|\
 	mangopi,m28k|\
 	nlnet,xgp|\
 	radxa,e20c|\
@@ -140,13 +157,15 @@ rockchip_setup_macs()
 	radxa,e54c|\
 	roceos,k40pro|\
 	roceos,k50s|\
+	roceos,k60pro|\
 	fastrhino,r66s|\
 	fastrhino,r68s)
 		wan_mac=$(generate_mac_from_mmc)
 		lan_mac=$(macaddr_add "$wan_mac" 1)
 		;;
 	*)
-		lan_mac=$(generate_mac_from_mmc)
+		lan_mac=$(read_vendor_mac)
+		[ -n "$lan_mac" ] || lan_mac=$(generate_mac_from_mmc)
 		;;
 	esac
 

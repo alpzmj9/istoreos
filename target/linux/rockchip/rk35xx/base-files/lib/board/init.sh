@@ -145,7 +145,7 @@ board_fixup_iface_name() {
 			rename_iface lan2 eth2
 		fi
 		;;
-	easepi,r1|\
+	easepi,r1|easepi,r1-lite|\
 	hinlink,opc-h68k)
 		device="$(get_iface_device eth1)"
 		if [[ "$device" = "fe010000.ethernet" ]]; then
@@ -168,7 +168,6 @@ board_fixup_iface_name() {
 			rename_iface lan2 eth2
 		fi
 		;;
-	hinlink,h88k-v3|\
 	friendlyelec,nanopi-r6s)
 		device="$(get_iface_device eth1)"
 		if [[ "$device" = "0004:41:00.0" ]]; then
@@ -240,7 +239,7 @@ board_set_iface_smp_affinity() {
 			set_iface_cpumask 1 "eth2" "eth2-16"
 		fi
 		;;
-	easepi,r1|\
+	easepi,r1|easepi,r1-lite|\
 	roceos,k40pro|\
 	roceos,k50s|\
 	lyt,t68m|\
@@ -357,7 +356,8 @@ board_set_iface_smp_affinity() {
 			set_iface_cpumask 5 eth1 eth1-0 a
 		fi
 		;;
-	easepi,r2|\
+	easepi,a2|\
+	easepi,a2-qc|\
 	ynn,nas|\
 	le,hes30|\
 	jp,tvbox|\

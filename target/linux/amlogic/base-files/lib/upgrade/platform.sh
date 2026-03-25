@@ -2,6 +2,28 @@
 # 1. keep overlay partition when upgrade
 # 2. reset rom uuid in ext_overlay (aka sandbox mode) when upgrade (stage2:istoreos_pre_upgrade)
 
+REQUIRE_IMAGE_METADATA=1
+
+platform_check_part_size() {
+	local part start size cursize
+	#iterate over each partition from the image and check boot disk partition size
+	while read part start size; do
+		if [ "$part" -ge 3 ]; then
+			continue
+		fi
+		cursize=$(echo $(grep -m1 '^ *'"$part"' *' /tmp/partmap.bootdisk) | cut -d' ' -f 3)
+		if [ -z "$cursize" ]; then
+			v "Unable to find partition $part on boot disk"
+			return 1
+		fi
+		if [ "$size" -gt "$cursize" ]; then
+			v "Partition $part on image is larger than boot disk ($size > $cursize)"
+			return 1
+		fi
+	done < /tmp/partmap.image
+	return 0
+}
+
 platform_check_image() {
 	local diskdev partdev diff
 
@@ -9,7 +31,6 @@ platform_check_image() {
 		v "Unable to determine upgrade device"
 		return 1
 	}
-	[ "$SAVE_CONFIG" -eq 1 ] && return 0
 
 	get_partitions "/dev/$diskdev" bootdisk
 
@@ -18,12 +39,15 @@ platform_check_image() {
 
 	get_partitions /tmp/image.bs image
 
-	#compare tables
-	diff="$(grep -F -x -v -f /tmp/partmap.bootdisk /tmp/partmap.image)"
-
+	platform_check_part_size || diff=1
 	rm -f /tmp/image.bs /tmp/partmap.bootdisk /tmp/partmap.image
 
 	if [ -n "$diff" ]; then
+		if echo "$diskdev" | grep -q '^mmcblk' && [ -e "/dev/${diskdev}boot0" ]; then
+			v "Target is eMMC, but image partition layout has changed, cannot process."
+			notify_firmware_broken || exit 1
+			return 1
+		fi
 		v "Partition layout has changed. Full image will be written."
 		ask_bool 0 "Abort" && exit 1
 		return 0
@@ -31,7 +55,7 @@ platform_check_image() {
 }
 
 platform_do_upgrade() {
-	local diskdev partdev part start size cursize
+	local diskdev partdev diff part start size
 
 	export_bootdevice && export_partdevice diskdev 0 || {
 		v "Unable to determine upgrade device"
@@ -47,21 +71,28 @@ platform_do_upgrade() {
 
 	get_partitions /tmp/image.bs image
 
-	#iterate over each partition from the image and check boot disk partition size
-	while read part start size; do
-		if [ -n "$UPGRADE_BACKUP" -a "$part" -ge 3 ]; then
-			continue
-		fi
-		cursize=$(echo $(grep -m1 '^ *'"$part"' *' /tmp/partmap.bootdisk) | cut -d' ' -f 3)
-		if [ -z "$cursize" ]; then
-			v "Unable to find partition $part on boot disk"
-			return 1
-		fi
-		if [ "$size" -gt "$cursize" ]; then
-			v "Partition $part on image is bigger than boot disk ($size > $cursize)"
-			return 1
-		fi
-	done < /tmp/partmap.image
+	if [ "$UPGRADE_OPT_SAVE_PARTITIONS" = "1" -o -n "$UPGRADE_BACKUP" ] || ( echo "$diskdev" | grep -q '^mmcblk' && [ -e "/dev/${diskdev}boot0" ] ); then
+		platform_check_part_size || diff=1
+	else
+		#compare tables
+		diff="$(grep -F -x -v -f /tmp/partmap.bootdisk /tmp/partmap.image)"
+	fi
+
+	if [ -n "$diff" ]; then
+		grep /overlay /proc/mounts > /dev/null && {
+			/bin/mount -o noatime,remount,ro /overlay
+			/usr/bin/umount -R -d -l /overlay 2>/dev/null || /bin/umount -l /overlay
+		}
+
+		get_image "$@" | dd of="/dev/$diskdev" bs=4096 conv=fsync
+
+		# Separate removal and addtion is necessary; otherwise, partition 1
+		# will be missing if it overlaps with the old partition 2
+		partx -d - "/dev/$diskdev"
+		partx -a - "/dev/$diskdev"
+
+		return 0
+	fi
 
 	#iterate over each partition from the image and write it to the boot disk
 	while read part start size; do

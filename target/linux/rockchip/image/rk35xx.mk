@@ -81,6 +81,7 @@ $(call Device/rk3528)
   DEVICE_MODEL := sige1
   SUPPORTED_DEVICES += armsom,sige1 armsom,sige1-v1 armsom,sige1-v1.0
   DEVICE_PACKAGES := kmod-r8125 kmod-thermal
+  DEFAULT := n
 endef
 TARGET_DEVICES += armsom_sige1
 
@@ -92,6 +93,7 @@ $(call Device/rk3588)
   DEVICE_DTS := rk3588-sige7-v1-1 rk3588-sige7-v1
   DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-hwmon-pwmfan kmod-thermal kmod-rkwifi-bcmdhd-pcie rkwifi-firmware-ap6275p
   IMAGE/sysupgrade.img.gz := boot-combined | boot-script rk3588 | pine64-img | gzip | append-metadata
+  DEFAULT := n
 endef
 TARGET_DEVICES += armsom_sige7-v1
 
@@ -163,13 +165,42 @@ $(call Device/rk3568)
 endef
 TARGET_DEVICES += easepi_r1
 
-define Device/easepi_r2
+define Device/easepi_r1-lite
 $(call Device/rk3568)
   DEVICE_VENDOR := EasePi
+  DEVICE_MODEL := R1 (4xGbE)
+  DEVICE_DTS := rk3568-easepi-r1-lite
+  SUPPORTED_DEVICES += easepi,r1 easepi,r1-lite
+  DEVICE_PACKAGES := kmod-r8168 kmod-nvme kmod-thermal
+endef
+TARGET_DEVICES += easepi_r1-lite
+
+define Device/easepi_a2
+$(call Device/rk3568)
+  DEVICE_VENDOR := EasePi
+  DEVICE_MODEL := A2
+  DEVICE_DTS := rk3568-easepi-a2
+  SUPPORTED_DEVICES += easepi,a2 easepi,a2-qc
+  DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-thermal kmod-brcmfmac cypress-firmware-43455-sdio brcmfmac-firmware-43455-sdio-nvram
+endef
+TARGET_DEVICES += easepi_a2
+
+define Device/easepi_a2_qc
+$(call Device/easepi_a2)
+  DEVICE_MODEL := A2 (QC)
+  DEVICE_DTS := rk3568-easepi-a2-qc
+  SUPPORTED_DEVICES := easepi,a2-qc
+  DEFAULT := n
+endef
+TARGET_DEVICES += easepi_a2_qc
+
+define Device/easepi_r2
+$(call Device/rk3588)
+  DEVICE_VENDOR := EasePi
   DEVICE_MODEL := R2
-  DEVICE_DTS := rk3568-easepi-r2
-  SUPPORTED_DEVICES += easepi,r2
-  DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-thermal
+  DEVICE_DTS := rk3588-easepi-r2
+  SUPPORTED_DEVICES := linkease,easepi-r2
+  DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-thermal kmod-brcmfmac cypress-firmware-43455-sdio brcmfmac-firmware-43455-sdio-nvram
 endef
 TARGET_DEVICES += easepi_r2
 
@@ -195,7 +226,7 @@ TARGET_DEVICES += friendlyarm_nanopi-r5s
 define Device/firefly_station-p2
 $(call Device/rk3568)
   DEVICE_VENDOR := Firefly
-  DEVICE_MODEL := Station P2 / ROC PC
+  DEVICE_MODEL := Station P2 / RK3568 ROC PC
   DEVICE_DTS := rk3568-firefly-roc-pc
   SUPPORTED_DEVICES += firefly,rk3568-roc-pc firefly,station-p2
   DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-scsi-core
@@ -240,8 +271,19 @@ $(call Device/rk3588)
   DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-scsi-core kmod-hwmon-pwmfan kmod-thermal kmod-dsa-mv88e6xxx kmod-rkwifi-bcmdhd-pcie rkwifi-firmware-ap6275p
   SUPPORTED_DEVICES += yijiahe,jm10
   DEVICE_DTS := rk3588-yijiahe-jm10
+  DEFAULT := n
 endef
 TARGET_DEVICES += yijiahe_jm10
+
+define Device/xunlong_orangepi-5-plus
+$(call Device/rk3588)
+  DEVICE_VENDOR := XunLong
+  DEVICE_MODEL := Orange Pi 5 Plus
+  DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-scsi-core kmod-hwmon-pwmfan kmod-thermal kmod-rkwifi-bcmdhd-pcie rkwifi-firmware-ap6275p
+  SUPPORTED_DEVICES += xunlong,orangepi-5-plus
+  DEVICE_DTS := rk3588-orangepi-5-plus
+endef
+TARGET_DEVICES += xunlong_orangepi-5-plus
 
 define Device/hinlink_rk3588
 $(call Device/rk3588)
@@ -284,6 +326,7 @@ $(call Device/rk3588)
   DEVICE_VENDOR := Inspur
   DEVICE_MODEL := IHEC301
   DEVICE_PACKAGES := kmod-scsi-core kmod-hwmon-pwmfan kmod-thermal kmod-switch-rtl8367b swconfig
+  DEFAULT := n
 endef
 TARGET_DEVICES += inspur_ihec301
 
@@ -294,6 +337,7 @@ $(call Device/rk3568)
   DEVICE_DTS := rk3568-jsy-h1
   SUPPORTED_DEVICES += jsy,h1
   DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-scsi-core kmod-thermal kmod-leds-pwm
+  DEFAULT := n
 endef
 TARGET_DEVICES += jsy_h1
 
@@ -304,6 +348,7 @@ $(call Device/rk3568)
   DEVICE_DTS := rk3568-yyy-h1
   SUPPORTED_DEVICES += yyy,h1
   DEVICE_PACKAGES := kmod-r8125 kmod-nvme kmod-thermal kmod-hwmon-pwmfan kmod-backlight-gpio kmod-leds-pwm
+  DEFAULT := n
 endef
 TARGET_DEVICES += yyy_h1
 
@@ -314,6 +359,7 @@ $(call Device/rk3568)
   DEVICE_DTS := rk3568-idiskk-h1
   SUPPORTED_DEVICES += idiskk,h1
   DEVICE_PACKAGES := kmod-scsi-core kmod-thermal kmod-hwmon-pwmfan kmod-backlight-gpio kmod-leds-pwm
+  DEFAULT := n
 endef
 TARGET_DEVICES += idiskk_h1
 
@@ -363,6 +409,7 @@ define Device/ynn_ynnnas
   DEVICE_MODEL := NAS
   SUPPORTED_DEVICES += ynn,nas
   DEVICE_PACKAGES := kmod-scsi-core
+  DEFAULT := n
 endef
 TARGET_DEVICES += ynn_ynnnas
 
@@ -388,7 +435,7 @@ TARGET_DEVICES += panther_x2
 define Device/firefly_station-m2
 $(call Device/rk3566)
   DEVICE_VENDOR := Firefly
-  DEVICE_MODEL := Station M2 / ROC PC
+  DEVICE_MODEL := Station M2 / RK3566 ROC PC
   DEVICE_DTS := rk3566-firefly-roc-pc
   SUPPORTED_DEVICES += rockchip,rk3566-firefly-roc-pc firefly,rk3566-roc-pc firefly,station-m2
   DEVICE_PACKAGES := kmod-nvme kmod-scsi-core
@@ -402,6 +449,7 @@ $(call Device/rk3566)
   DEVICE_DTS := rk3566-hes30
   SUPPORTED_DEVICES += le,hes30
   DEVICE_PACKAGES := kmod-scsi-core kmod-thermal kmod-hwmon-pwmfan
+  DEFAULT := n
 endef
 TARGET_DEVICES += le_hes30
 
@@ -411,6 +459,7 @@ $(call Device/rk3566)
   DEVICE_MODEL := NAS 101
   DEVICE_DTS := rk3566-klan-nas101
   DEVICE_PACKAGES := kmod-scsi-core
+  DEFAULT := n
 endef
 TARGET_DEVICES += klan_nas101
 
@@ -420,6 +469,7 @@ $(call Device/rk3566)
   DEVICE_MODEL := NAS 102
   DEVICE_DTS := rk3566-klan-nas102
   DEVICE_PACKAGES := kmod-scsi-core
+  DEFAULT := n
 endef
 TARGET_DEVICES += klan_nas102
 
@@ -481,6 +531,7 @@ $(call Device/rk3568)
   DEVICE_DTS := rk3568-roc-k40pro-v2
   SUPPORTED_DEVICES += roceos,k40pro
   DEVICE_PACKAGES := kmod-r8125 kmod-r8168 kmod-nvme kmod-thermal
+  DEFAULT := n
 endef
 TARGET_DEVICES += roc_k40pro
 
@@ -491,8 +542,19 @@ $(call Device/rk3568)
   DEVICE_DTS := rk3568-roc-k50s
   SUPPORTED_DEVICES += roceos,k50s
   DEVICE_PACKAGES := kmod-r8125 kmod-thermal
+  DEFAULT := n
 endef
 TARGET_DEVICES += roc_k50s
+
+define Device/roc_k60pro
+$(call Device/rk3588)
+  DEVICE_VENDOR := ROCEOS
+  DEVICE_MODEL := K60PRO
+  DEVICE_DTS := rk3588-k60pro
+  DEVICE_PACKAGES := kmod-r8125 kmod-thermal
+  DEFAULT := n
+endef
+TARGET_DEVICES += roc_k60pro
 
 define Device/nlnet_xgp
 $(call Device/rk3568)
